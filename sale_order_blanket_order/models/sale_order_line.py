@@ -166,6 +166,14 @@ class SaleOrderLine(models.Model):
         - We exclude lines with no quantity remaining to procure since a new order could
             be created with the same product to cover a new need.
         """
+        to_check = self.filtered(
+            lambda rec: rec.order_type == "blanket"
+            and rec.blanket_validity_start_date
+            and rec.blanket_validity_end_date
+            and rec.state == "sale"
+        )
+        if not to_check:
+            return
         self.flush_model(
             [
                 "blanket_validity_start_date",
